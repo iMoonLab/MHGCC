@@ -1,0 +1,64 @@
+loss: loss.coxph_loss
+n_fold: 5
+dataset: dataset.WSI_Dataset.SlidePatch
+data_seed: 10
+
+WSI_patch_ft_dir: /PATH/TO/WSI_patch_ft_dir
+WSI_patch_coor_dir: /PATH/TO/WSI_patch_coor_dir
+CT_3d_feature_file: /PATH/TO/CT_3d_feature_file
+CT_2d_feature_file: /PATH/TO/CT_2d_feature_file
+Cli_feature_file: /PATH/TO/Cli_feature_file
+
+
+H_coors: True
+
+model: model.ct_multi-views-inter.Model
+model_args:
+  in_channels: 512
+  dropout: 0.1
+
+model_hyconv: model.inter_hyconv_simple_ct.Model
+model_hyconv_args: '{"in_channels": 1024, "n_target": 2, "k_nearest": 9, "k_nearest_wsi": 5, "linear_hiddens": [512, 200], "dropout": 0.1}'
+
+model_wsi: model.Hyconv_wsi.Model
+model_wsi_args:
+  dropout: 0.3
+  hiddens:
+      - 800
+      - 400
+      - 200
+  in_channels: 1792
+  k_threshold: 0.09
+  n_target: 2
+
+model_hyconv_wsi: model.inter_hyconv_simple_wsi.Model
+model_hyconv_wsi_args: '{"in_channels": 200, "n_target": 2, "k_nearest": 9, "k_nearest_wsi": 5, "linear_hiddens": [200], "dropout": 0.1}'
+
+model_HC: model.highOrderConstraint.Model
+model_HC_args: '{"noise_level": 1.0, "tau": 0.5}'
+
+weight_decay: 0.0005
+base_lr: 0.01
+lr_decay_rate: 0.1
+
+step: [15,40]
+num_epoch: 50
+
+num_epoch_hyconv: 400
+step_hyconv: [200, 300]
+weight_decay_hyconv: 0.0005
+
+num_epoch_wsi: 20
+step_wsi: 20
+
+num_epoch_hyconv_wsi: 400
+step_hyconv_wsi: [200, 300]
+weight_decay_hyconv_wsi: 0.0005
+
+lamb: 0.5
+lamb_ds: 0.5
+lamb_hc: 0.5
+
+device: [1]
+batch_size: 16
+test_batch_size: 16
